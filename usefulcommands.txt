@@ -1,0 +1,20 @@
+# Initialize a Docker project
+docker init
+
+# Build a docker image, modify to point to location of Dockerfile
+docker build -t <image_name>:<image_tag> . 
+
+# Build and deploying using compose
+docker compose up -d --build
+
+# Bring down all containers
+docker compose down
+
+# Tag an existing docker image
+docker tag sha256:jnqjrwd89f8dsf8ds89f8sdufhusdhf8ds8f myimageregistry.com/repository/image:tag 
+
+# Push to a registry
+docker push myimageregistry.com/repository/image:tag
+
+# Login to a registry
+docker login myimageregistry.com
