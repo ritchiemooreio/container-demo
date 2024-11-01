@@ -1,0 +1,16 @@
+version: '1'
+services:
+  web:
+    #1. build the image
+    
+    #2. expose the port 8080 to the host machine
+
+    #3. depends on the redis service
+
+    #4. set the REDIS_HOST environment variable
+  
+
+  redis:
+    #5. use the redis:alpine image
+
+    #6. expose the port 6379 to the host machine
