@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: bali-ui-helm-7b885f9747-
+  labels:
+    app.kubernetes.io/instance: bali-ui
+    app.kubernetes.io/name: bali-ui-helm
+    pod-template-hash: 7b885f9747
+  name: bali-ui-helm-7b885f9747-8r5sl
+  namespace: skyral-bdt
+spec:
+  containers:
+  - envFrom:
+    - configMapRef:
+        name: bali-ui-helm-env-variables
+        optional: false
+    image: skyralgroup.jfrog.io/bali/bali-ui:1523b7e748474296926c07beead06880b2264441
+    imagePullPolicy: IfNotPresent
+    name: bali-ui
+    ports:
+    - containerPort: 80
+      name: http
+      protocol: TCP
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 64Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fvhj9
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  imagePullSecrets:
+  - name: artifactory-image-pull-secret
+  nodeName: gke-development-default-b0258db6-jkk8
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-fvhj9
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace

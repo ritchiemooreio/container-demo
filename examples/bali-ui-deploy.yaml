@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "83"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"bali-ui","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"bali-ui-helm","argocd.argoproj.io/instance":"bali-ui","helm.sh/chart":"bali-ui-helm-0.4.1"},"name":"bali-ui-helm","namespace":"skyral-bdt"},"spec":{"selector":{"matchLabels":{"app.kubernetes.io/instance":"bali-ui","app.kubernetes.io/name":"bali-ui-helm"}},"template":{"metadata":{"labels":{"app.kubernetes.io/instance":"bali-ui","app.kubernetes.io/name":"bali-ui-helm"}},"spec":{"containers":[{"envFrom":[{"configMapRef":{"name":"bali-ui-helm-env-variables","optional":false}}],"image":"skyralgroup.jfrog.io/bali/bali-ui:1523b7e748474296926c07beead06880b2264441","imagePullPolicy":"IfNotPresent","name":"bali-ui","ports":[{"containerPort":80,"name":"http","protocol":"TCP"}],"resources":{"limits":{"memory":"128Mi"},"requests":{"cpu":"100m","memory":"64Mi"}}}],"imagePullSecrets":[{"name":"artifactory-image-pull-secret"}]}}}}
+  creationTimestamp: "2024-09-30T11:32:17Z"
+  generation: 84
+  labels:
+    app.kubernetes.io/instance: bali-ui
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bali-ui-helm
+    argocd.argoproj.io/instance: bali-ui
+    helm.sh/chart: bali-ui-helm-0.4.1
+  name: bali-ui-helm
+  namespace: skyral-bdt
+  resourceVersion: "108775034"
+  uid: 238027cb-9786-4491-8957-08d20f4c5f4b
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: bali-ui
+      app.kubernetes.io/name: bali-ui-helm
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2024-10-15T09:35:55Z"
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: bali-ui
+        app.kubernetes.io/name: bali-ui-helm
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: bali-ui-helm-env-variables
+            optional: false
+        image: skyralgroup.jfrog.io/bali/bali-ui:1523b7e748474296926c07beead06880b2264441
+        imagePullPolicy: IfNotPresent
+        name: bali-ui
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: artifactory-image-pull-secret
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2024-11-12T11:47:23Z"
+    lastUpdateTime: "2024-11-12T11:47:23Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2024-11-21T14:35:44Z"
+    lastUpdateTime: "2024-11-22T13:57:23Z"
+    message: ReplicaSet "bali-ui-helm-7b885f9747" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 84
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

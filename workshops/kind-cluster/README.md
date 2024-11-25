@@ -33,3 +33,9 @@ kubectl delete -f <file_name>
 
 # Replace resources using a Kube manifest
 kubectl replace -f <file_name>
+
+# In a namespace
+kubectl api-resources --namespaced=true
+
+# Not in a namespace
+kubectl api-resources --namespaced=false

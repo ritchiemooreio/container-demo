@@ -1,0 +1,221 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    min.io/revision: "0"
+  creationTimestamp: "2024-09-26T14:44:38Z"
+  generation: 1
+  labels:
+    app: minio
+    argocd.argoproj.io/instance: spore-storage
+    v1.min.io/console: spore-object-store-console
+    v1.min.io/pool: pool
+    v1.min.io/tenant: spore-object-store
+  name: spore-object-store-pool
+  namespace: skyral
+  ownerReferences:
+  - apiVersion: minio.min.io/v2
+    blockOwnerDeletion: true
+    controller: true
+    kind: Tenant
+    name: spore-object-store
+    uid: 2f63a25d-4952-471e-9863-b976adb422f5
+  resourceVersion: "97299955"
+  uid: a99871cf-2278-466c-a4cb-a792446fe45f
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  podManagementPolicy: Parallel
+  replicas: 4
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      v1.min.io/console: spore-object-store-console
+      v1.min.io/pool: pool
+      v1.min.io/tenant: spore-object-store
+  serviceName: spore-object-store-hl
+  template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-wave: "5"
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"minio.min.io/v2","kind":"Tenant","metadata":{"annotations":{"argocd.argoproj.io/sync-wave":"5"},"labels":{"app":"minio","argocd.argoproj.io/instance":"spore-storage"},"name":"spore-object-store","namespace":"skyral"},"spec":{"buckets":[{"name":"skyral-foundations","objectLock":true}],"configuration":{"name":"spore-minio-server-envs"},"env":[{"name":"MINIO_PROMETHEUS_AUTH_TYPE","value":"public"},{"name":"MINIO_PROMETHEUS_JOB_ID","value":"spore-object-store-minio-job"},{"name":"MINIO_PROMETHEUS_URL","value":"http://spore-observability-prometheus.monitoring.svc.cluster.local:9090"}],"features":{"bucketDNS":true,"domains":{}},"image":"skyralgroup.jfrog.io/quay-io/minio/minio:RELEASE.2024-09-09T16-59-28Z","imagePullPolicy":"IfNotPresent","imagePullSecret":{"name":"artifactory-image-pull-secret"},"logging":{"json":true},"mountPath":"/export","podManagementPolicy":"Parallel","pools":[{"affinity":{"nodeAffinity":{},"podAffinity":{},"podAntiAffinity":{}},"containerSecurityContext":{"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"name":"pool","nodeSelector":{},"resources":{},"securityContext":{"fsGroup":1000,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"servers":4,"tolerations":[],"volumeClaimTemplate":{"apiVersion":"v1","kind":"persistentvolumeclaims","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"20G"}},"storageClassName":"gce-pd-cmek-standard"}},"volumesPerServer":1}],"priorityClassName":"","prometheusOperator":false,"requestAutoCert":true,"serviceAccountName":"","subPath":"","users":[{"name":"spore-storage-user"}]}}
+        min.io/revision: "0"
+      creationTimestamp: null
+      labels:
+        app: minio
+        argocd.argoproj.io/instance: spore-storage
+        v1.min.io/console: spore-object-store-console
+        v1.min.io/pool: pool
+        v1.min.io/tenant: spore-object-store
+    spec:
+      affinity:
+        nodeAffinity: {}
+        podAffinity: {}
+        podAntiAffinity: {}
+      containers:
+      - args:
+        - server
+        - --certs-dir
+        - /tmp/certs
+        - --console-address
+        - :9443
+        - --json
+        env:
+        - name: MINIO_CONFIG_ENV_FILE
+          value: /tmp/minio/config.env
+        - name: MINIO_DNS_WEBHOOK_ENDPOINT
+          value: http://127.0.0.1:4222/webhook/v1/bucketsrv/skyral/spore-object-store
+        - name: MINIO_DOMAIN
+          value: skyral.svc.cluster.local
+        - name: MINIO_OPERATOR_VERSION
+          value: 5.0.15
+        - name: MINIO_PROMETHEUS_AUTH_TYPE
+          value: public
+        - name: MINIO_PROMETHEUS_JOB_ID
+          value: spore-object-store-minio-job
+        - name: MINIO_PROMETHEUS_URL
+          value: http://spore-observability-prometheus.monitoring.svc.cluster.local:9090
+        - name: MINIO_SERVER_URL
+          value: https://minio.skyral.svc.cluster.local:443
+        - name: MINIO_UPDATE
+          value: "on"
+        - name: MINIO_UPDATE_MINISIGN_PUBKEY
+          value: RWTx5Zr1tiHQLwG9keckT0c45M3AGeHD6IvimQHpyRywVWGbP1aVSGav
+        image: skyralgroup.jfrog.io/quay-io/minio/minio:RELEASE.2024-09-09T16-59-28Z
+        imagePullPolicy: IfNotPresent
+        name: minio
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+        - containerPort: 9443
+          protocol: TCP
+        resources: {}
+        securityContext:
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/minio/
+          name: cfg-vol
+        - mountPath: /export
+          name: "0"
+        - mountPath: /tmp/certs
+          name: spore-object-store-tls
+      - args:
+        - sidecar
+        - --tenant
+        - spore-object-store
+        - --config-name
+        - spore-minio-server-envs
+        env:
+        - name: CLUSTER_DOMAIN
+          value: cluster.local
+        image: skyralgroup.jfrog.io/docker-io/minio/operator:v5.0.15
+        imagePullPolicy: IfNotPresent
+        name: sidecar
+        resources: {}
+        securityContext:
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/minio/
+          name: cfg-vol
+        - mountPath: /tmp/minio-config
+          name: configuration
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: artifactory-image-pull-secret
+      initContainers:
+      - args:
+        - validate
+        - --tenant
+        - spore-object-store
+        env:
+        - name: CLUSTER_DOMAIN
+          value: cluster.local
+        image: skyralgroup.jfrog.io/docker-io/minio/operator:v5.0.15
+        imagePullPolicy: IfNotPresent
+        name: validate-arguments
+        resources: {}
+        securityContext:
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/minio/
+          name: cfg-vol
+        - mountPath: /tmp/minio-config
+          name: configuration
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      serviceAccount: spore-object-store-sa
+      serviceAccountName: spore-object-store-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: cfg-vol
+      - name: spore-object-store-tls
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              items:
+              - key: public.crt
+                path: public.crt
+              - key: private.key
+                path: private.key
+              - key: public.crt
+                path: CAs/public.crt
+              name: spore-object-store-tls
+      - name: configuration
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              name: spore-minio-server-envs
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: "0"
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20G
+      storageClassName: gce-pd-cmek-standard
+      volumeMode: Filesystem
+    status:
+      phase: Pending
+status:
+  availableReplicas: 4
+  collisionCount: 0
+  currentReplicas: 4
+  currentRevision: spore-object-store-pool-586fc55459
+  observedGeneration: 1
+  readyReplicas: 4
+  replicas: 4
+  updateRevision: spore-object-store-pool-586fc55459
+  updatedReplicas: 4
