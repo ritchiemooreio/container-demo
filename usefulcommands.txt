@@ -18,3 +18,12 @@ docker push myimageregistry.com/repository/image:tag
 
 # Login to a registry
 docker login myimageregistry.com
+
+#create kind cluster
+kind create cluster --config kind-config.yaml
+
+# Describe a pod 
+kubectl describe pods <pod_name> 
+
+# update a deployment
+kubectl set image deployment/mydeployment myapp=nginx:1.14.1
